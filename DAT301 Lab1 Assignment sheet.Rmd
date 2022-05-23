@@ -45,7 +45,7 @@ df = data.frame(MaxTempF, Humidity3PM, RainedToday)
 
 ggplot(df, aes(x = MaxTempF, y = Humidity3PM, color = RainedToday)) + geom_point() + scale_color_manual(values = c("Yes" = "Blue", "No" = "Red")) + labs(title = "Max Daily Temp vs Afternoon Humidity")  
 ```
-The scatterplot shows a weak negative correlation between the max temperatures and the humidity levels at 3pm.  This is surprising because I would have expected hotter days to tend to be more humid, as I associate high humidity with hot days
+The scatterplot shows a weak negative correlation between the max temperatures and the humidity levels at 3pm.  This is surprising because I would have expected hotter days to tend to be more humid, as I associate high humidity with hot days.  
 
 
 
