@@ -1,7 +1,10 @@
 ---
 title: "Lab 1B"
 name: ""
-output: pdf_document
+output: 
+  pdf_document: 
+    toc: yes
+    keep_tex: yes
 ---
 
 The following dataset, titled "Rain in Australia," was obtained via Kaggle.com via author Joe Young et. al.
@@ -68,21 +71,52 @@ Plot a histogram of `Rainfall`, including all values from `rain` dataset given t
     NonzeroRainfall = NonzeroRainfall[!is.na(NonzeroRainfall)]
     
     hist(NonzeroRainfall, freq = F, col = "lightblue", 
-         xlab = "Rainfall(mm)", ylab = "Density", 
-         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in                  2016")
+         xlab = "Rainfall(mm)", ylab = "Density", ylim = c(0,0.05),
+         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in 2016", labels = T)
     
     DensityFunction = density(NonzeroRainfall, kernel = "gaussian")
     lines(DensityFunction$x, DensityFunction$y, type = 'l', lwd = 2)
+    
+    #Feel free to ignore the code below removing outliars.  I know it wasn't required.  I just wanted to see the plots with and without outliars and compare since the outliars were skewing things so much it was hard to see any patterns otherwise.
+    
+    RemoveObviousOutliars = ifelse(NonzeroRainfall < 55, NonzeroRainfall, NA)
+    RemoveObviousOutliars = RemoveObviousOutliars[!is.na(RemoveObviousOutliars)]
+    
+    hist(RemoveObviousOutliars, freq = F, col = "lightblue", 
+         xlab = "Rainfall(mm)", ylab = "Density", ylim = c(0,0.15),
+         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in 2016 without obvious outliars", labels = T)
+    
+    DensityFunction = density(RemoveObviousOutliars, kernel = "gaussian")
+    lines(DensityFunction$x, DensityFunction$y, type = 'l', lwd = 2)
+    
+    
+    #24.9 is upper outliar boundary. Lower boundary is negative and hence irrelevant 
+    RemoveAllOutliars = ifelse(NonzeroRainfall < 25, NonzeroRainfall, NA)
+    RemoveAllOutliars = RemoveAllOutliars[!is.na(RemoveAllOutliars)]
+    
+    hist(RemoveAllOutliars, freq = F, col = "lightblue", 
+         xlab = "Rainfall(mm)", ylab = "Density", ylim = c(0,0.15),
+         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in 2016 without any outliars", labels = T)
+    
+    DensityFunction = density(RemoveAllOutliars, kernel = "gaussian")
+    lines(DensityFunction$x, DensityFunction$y, type = 'l', lwd = 2)
 ```
-
+There isn't really that much to say here.  The vats majority (about 89%) of the rain measurements are evidently in the range 0-50mm, and the few are incredibly spread out, in the range of around 50-225mm (note that the densities aren't actually zero; they're just so small they got rounded to zero).  It's so spread out compared to the data in the range 0-50, in fact, that it's difficult to even see most of the bars after the three leftmost ones.
 
 ### Part B
 Find the mean and median of the `Rainfall` in mm for days that it rained in Australia.  Do these numbers correspond with the image in part A?
 
 ```{r}
-
+    mean(NonzeroRainfall)
+    median(NonzeroRainfall)
+    
+    mean(RemoveObviousOutliars)
+    median(RemoveObviousOutliars)
+    
+    mean(RemoveAllOutliars)
+    median(RemoveAllOutliars)
 ```
-
+Yes, the mean and median make sense based on the distribution of the data shown in the histogram.  The data is highly right skewed with multiple extreme upper outliars.  As a result, the mean is significantly larger than the median.  Removing first the obvious outliars, then all outliars mitigates this effect greatly, though the data is still right skewed, so the mean is still larger.
 
 
 ## Question 3
@@ -90,7 +124,18 @@ Find the mean and median of the `Rainfall` in mm for days that it rained in Aust
 ### Part A
 Plot a bar graph representing *total* `Rainfall` in 2016 by `Location`.  Make sure to label the x- and y- axes, colorize the bars, include a title, and include the appropriate response labeled above each bar.  Utilize all observations from dataset `rain`. Include a discussion after the plot.
 
-```{r}
+```{r message=TRUE, warning=TRUE, paged.print=FALSE}
+    library(dplyr)
+    
+    RainfallByLocation = tapply(Weather$Rainfall, Weather$Location, sum)
+    
+    RainfallByLocation = RainfallByLocation[!is.na(RainfallByLocation)]
+    
+    counts = as.vector(RainfallByLocation)
+
+    RainfallBarGraph = barplot(RainfallByLocation, main = "Total 2016 Rainfall by Location",                                             xlab = "Location", ylab = "Rainfall(mm)", 
+                               ylim = c(0, 1500),col = "deeppink")
+    text(x = RainfallBarGraph, y = counts + 90, labels = as.character(counts), cex = 1.0, col = "purple")
 
 ```
 
