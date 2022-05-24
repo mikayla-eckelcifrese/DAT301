@@ -27,6 +27,7 @@ Hints:
 
 ```{r}
 library(dplyr)
+set.seed(1000)
 WeatherSample = (sample_n(weatherAUS_xls, 1000))
 
 MaxTemp = WeatherSample[4]
@@ -40,13 +41,16 @@ RainedToday = ifelse(RainedToday == "No", "Blue", "Red")
 
 plot(MaxTempF, Humidity3PM, xlab = "Highest Daily Temperature (F°)", ylab = "Humidity Level at 3pm (%)", col = RainedToday) 
 
-title("Max Daily Temp vs Afternoon Humidity")  
+title("Maximum Daily Temperature vs Afternoon Humidity")  
 
-r = cor(as.double(MaxTempF), as.double(Humidity3PM), use = "complete.obs")
-text(100, 80, paste("r = ",round(r, 3)))
+legend(x ="topright", legend = c("Yes", "No"), fill = c("Blue", "Red"), title = "Rain")
+
+r = cor(as.double(MaxTempF), as.double(Humidity3PM), use = "complete.obs")  
+text(40, 40, paste("r = ",round(r, 3)))
 ```
-The scatterplot shows a weak negative correlation between the max temperatures and the humidity levels at 3pm.  This is surprising because I would have expected hotter days to tend to be more humid, as I associate high humidity with hot days.  
 
+The scatterplot shows a weak negative correlation between the max temperatures and the humidity levels at 3pm, as can be seen by the points being somewhat clustered together forming.  If this data is a representative sample, that indicates that, in Australia, in 2016, the humidity level at 3pm was a weak predictor for the highest temperature in a given day.  Specifically, the correlation coefficient, which I added to the graph is -0.538, which, squared, gives the cooefficient of variation, which is 0.289, which means that only about 28.9% of the variation in the daily high temperature readings is predicted by the variation in the humidity readings taken at 3pm.  
+Additionally, while there doesn't seem to be much of a pattern in the rainy vs non-rainy days it is worth noting that there are very few rainy days with a humidity of greater than 80% compared to non-rainy days.  
 
 
 ## Question 2
@@ -55,7 +59,20 @@ The scatterplot shows a weak negative correlation between the max temperatures a
 Plot a histogram of `Rainfall`, including all values from `rain` dataset given that it had rained that day.  Display density on the y-axis.  Label the axes and give the graph a title.  Colorize the bars.  Include a discussion after the plot.
 
 ```{r}
+    Weather = weatherAUS_xls
 
+    RainedToday = Weather$RainToday
+    
+    NonzeroRainfall = ifelse(RainedToday == "Yes", Weather$Rainfall, NA)
+    
+    NonzeroRainfall = NonzeroRainfall[!is.na(NonzeroRainfall)]
+    
+    hist(NonzeroRainfall, freq = F, col = "lightblue", 
+         xlab = "Rainfall(mm)", ylab = "Density", 
+         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in                  2016")
+    
+    DensityFunction = density(NonzeroRainfall, kernel = "gaussian")
+    lines(DensityFunction$x, DensityFunction$y, type = 'l', lwd = 2)
 ```
 
 
