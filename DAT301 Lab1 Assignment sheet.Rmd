@@ -132,19 +132,49 @@ Plot a bar graph representing *total* `Rainfall` in 2016 by `Location`.  Make su
     RainfallByLocation = RainfallByLocation[!is.na(RainfallByLocation)]
     
     counts = as.vector(RainfallByLocation)
+    
+    Locations = c('Adelaide','Albury','Canberra','Coffs-Harbour','Darwin','Hobart','Launceston',
+              'MB Airport','Mildura','Perth','Perth Airport','Sydney','Sydney Airport')
+    
+    par(mai=c(1.02,0.82,0.8,0.1)) #adjust margins so labels will fit on graph
 
-    RainfallBarGraph = barplot(RainfallByLocation, main = "Total 2016 Rainfall by Location",                                             xlab = "Location", ylab = "Rainfall(mm)", 
-                               ylim = c(0, 1500),col = "deeppink")
-    text(x = RainfallBarGraph, y = counts + 90, labels = as.character(counts), cex = 1.0, col = "purple")
+    RainfallBarGraph = barplot(RainfallByLocation,names.arg = Locations, 
+                               main = "Total 2016 Rainfall by Location", xlab = "Location", 
+                               ylab = "Rainfall(mm)", ylim = c(0, 1500), xlim = c(0, 43), width = 2.5,
+                               col = "deeppink", 
+                               cex.names = 0.4) 
+    
+    text(x = RainfallBarGraph, y = counts + 90, labels = as.character(counts), cex = 0.8, col = "purple")
 
 ```
+There's a decent amount of variation in the total rainfall between cities, although nothing crazy.  The main thing of note is that the graph includes only 13 total locations because the none of the other locations had rainfall data for every date and so the total rainfall for them could not be computed.
 
 
 ### Part B
 Plot a bar graph representing *average* `Rainfall` per day based on `Location`.  Make sure to label the x- and y- axes, colorize the bars, include a title, and include the appropriate response labeled above each bar.  Utilize all observations from dataset `rain`. Include a discussion after the plot.
 
 ```{r}
+    AverageRainfallByLocation = tapply(Weather$Rainfall, Weather$Location, mean)
+    
+    AverageRainfallByLocation = AverageRainfallByLocation[!is.na(AverageRainfallByLocation)]
+    
+    counts2 = as.vector(AverageRainfallByLocation)
+    
+    counts2
+    
+    Locations = c('Adelaide','Albury','Canberra','Coffs-Harbour','Darwin','Hobart','Launceston',
+              'MB Airport','Mildura','Perth','Perth Airport','Sydney','Sydney Airport')
+    
+    par(mai=c(1.02,0.82,0.8,0.1)) #adjust margins so labels will fit on graph
 
+    AverageRainfallBarGraph = barplot(AverageRainfallByLocation,names.arg = Locations, 
+                               main = "Average 2016 Rainfall by Location", xlab = "Location", 
+                               ylab = "Rainfall(mm)", ylim = c(0, 4.1), xlim = c(0, 43), width = 2.5,
+                               col = "purple", 
+                               cex.names = 0.4) 
+    
+    text(x = AverageRainfallBarGraph, y = counts2 + 0.2, labels = as.character(round(counts2, 2)), 
+         cex = 0.8, col = "deeppink")
 ```
 
 
