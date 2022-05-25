@@ -170,28 +170,59 @@ Plot a bar graph representing *average* `Rainfall` per day based on `Location`. 
     AverageRainfallBarGraph = barplot(AverageRainfallByLocation,names.arg = Locations, 
                                main = "Average 2016 Rainfall by Location", xlab = "Location", 
                                ylab = "Rainfall(mm)", ylim = c(0, 4.1), xlim = c(0, 43), width = 2.5,
-                               col = "purple", 
-                               cex.names = 0.4) 
+                               col = "purple", cex.names = 0.4) 
     
     text(x = AverageRainfallBarGraph, y = counts2 + 0.2, labels = as.character(round(counts2, 2)), 
          cex = 0.8, col = "deeppink")
 ```
-
+There looks to be about the same amount of variation in the average rainfall per city as there is in the total rainfall per city.  The great difference is between Mildura and Sydney, which leads me to think they likely have different local climates.  As in part A, I've included only those locations for which I have the full set of rainfall data.  
 
 ### Part C
 Plot a bar graph representing *total* count of days rained in 2016 based on `Location`.  Make sure to label the x- and y- axes, colorize the bars, include a title, and include the appropriate response labeled above each bar.  Utilize all observations from dataset `rain`. Include a discussion after the plot.
 
 ```{r}
+    DaysRainedByLocation = tapply((Weather$RainToday == "Yes"), Weather$Location, sum)
 
+    counts = as.vector(DaysRainedByLocation)
+    
+    par(mai=c(1.5,0.82,0.8,0.1), mgp = c(5, 1, 0)) #adjust margins so labels will fit on graph
+    
+    DaysRainedBarGraph = barplot(DaysRainedByLocation, #names.arg = Locations, 
+                               main = "Rainy Days in 2016 by Location", xlab = "Location", las = 2,
+                               ylab = "Count of Rainy Days", ylim = c(0, 175), xlim = c(0, 43), 
+                               width = 0.75, col = "deeppink", cex.names = 0.5) 
+    
+    text(x = DaysRainedBarGraph, y = counts + 5, labels = as.character(counts) , cex = 0.55, 
+         col = "purple")
 ```
 
-
+There's a lot of variation between locations here.  We go from a minimum of only 32 rainy days in Woomera to a maximum of 147 in Portland.  That further makes me think the climate varies throughout Australia.  
 
 ## Question 4
 
 For locations `Brisbane`, `Melbourne`, `Perth`, and `Sydney`, plot side by side boxplots of the variable `Rainfall` for days where it rained.  The graph should include a title, x- and y-axis labels, and unique colors for the 4 boxplots.  The data should include all observations from the `rain` dataset.  Include a discussion after the plot.
 
 ```{r}
-rainCity = rain[rain$Location %in% c('Brisbane', 'Melbourne', 'Perth', 'Sydney'), ]
-boxplot(y~x)
+WeatherInRelevantCities = Weather[Weather$Location %in% c('Brisbane', 'Melbourne', 'Perth', 'Sydney'), ]
+
+WeatherInRelevantCities = na.omit(data.frame(WeatherInRelevantCities$Rainfall,   
+                                             WeatherInRelevantCities$Location))
+
+WeatherInRelevantCities = WeatherInRelevantCities[WeatherInRelevantCities[1] > 0,]
+
+names(WeatherInRelevantCities) = c("Rainfall", "Location")
+
+boxplot(Rainfall~Location, data = WeatherInRelevantCities, outline = T, 
+        main = "Daily 2016 Rainfall Grouped By City", ylab = "Daily Rainfall(mm)",
+        col=topo.colors(length(unique(WeatherInRelevantCities$Location))))
+
+par(mai=c(1.02,0.82,0.8,0.5))
+
+boxplot(Rainfall~Location, data = WeatherInRelevantCities, outline = F,
+        main = "Daily 2016 Rainfall Grouped By City \n (Outliars Excluded)",
+        ylab = "Daily Rainfall(mm)",
+        col=topo.colors(length(unique(WeatherInRelevantCities$Location))))
+
+
 ```
+The first thing of note here is that the there are a LOT of outliars in these groups.  The first plot has so many that the space they take up somewhat obscures the actual boxes in the box plots. Brisbane and Sydney both have the widest spread to their outliars, which makes sense because they both also have the widest spread to their data overall.  
