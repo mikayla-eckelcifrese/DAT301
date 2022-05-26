@@ -34,7 +34,7 @@ Hints:
     WeatherSample = (sample_n(Weather, 1000))
     WeatherSample = na.omit(WeatherSample)
     
-    MaxTemp = unlist(as.double(WeatherSample[4]))#won't plot without doing unlist
+    MaxTemp = as.double(unlist(WeatherSample[4]))#won't plot without doing unlist
     MaxTempF = MaxTemp*(9/5)  + 32
     
     Humidity3PM = unlist(WeatherSample[15])
@@ -54,7 +54,7 @@ Hints:
     text(60, 20, paste("r = ",round(r, 3)))
 ```
 
-The scatterplot shows a weak negative correlation between the max temperatures and the humidity levels at 3pm, as can be seen by the points being somewhat clustered together forming.  If this data is a representative sample, that indicates that, in Australia, in 2016, the humidity level at 3pm was a weak predictor for the highest temperature in a given day.  Specifically, the correlation coefficient, which I added to the graph is -0.421, which, squared, gives the coefficient of variation, which is about 0.177, which means that only about 17.7% of the variation in the daily high temperature readings is predicted by the variation in the humidity readings taken at 3pm.  
+The scatterplot shows a weak negative correlation between the max temperatures and the humidity levels at 3pm, as can be seen by the points being somewhat clustered together forming.  If this data is a representative sample, that indicates that, in Australia, in 2016, the humidity level at 3pm was a weak predictor for the highest temperature in a given day.  Specifically, the correlation coefficient, which I added to the graph is -0.428, which, squared, gives the coefficient of variation, which is about 0.183, which means that only about 18.3% of the variation in the daily high temperature readings is predicted by the variation in the humidity readings taken at 3pm.  
 Additionally, while there doesn't seem to be much of a pattern in the rainy vs non-rainy days it is worth noting that there are very few rainy days with a humidity of greater than 80% compared to non-rainy days.  
 
 
