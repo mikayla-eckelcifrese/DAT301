@@ -1,0 +1,217 @@
+---
+title: "Lab 1B"
+name: ""
+output: 
+  pdf_document: 
+    toc: yes
+    keep_tex: yes
+---
+
+The following dataset, titled "Rain in Australia," was obtained via Kaggle.com via author Joe Young et. al.
+
+This dataset contains daily weather observations from numerous Australian weather stations during the year 2016.  The dataset measured variables: Date, Location, MinTemp (C), MaxTemp (C), Rainfall (mm), Evaporation (mm per 24 hours), Sunshine (hours per day), WindGustDir (strongest gust in 24 hours), WindGustSpeed (km/h), WindDir9am (direction at 9 AM), ..., RainToday (Yes/No) and RainTomorrow (Yes/No).
+
+```{r}
+library(readxl)
+Weather =read_excel("C:\\Users\\mbles\\Documents\\weatherAUS.xls.xlsx")
+Weather = na.omit(Weather)
+head(Weather, 4)
+```
+
+
+
+## Question 1
+Using 1000 randomly sampled observations from the dataset `rain`, plot a scatter plot of `MaxTempF` (x) vs. `Humidity3PM` (y).  `MaxTempF` should be the `MaxTemp` variable converted to degrees F.  Color the point on the scatterplot blue if it rained that day and red if it did not rain that day.  The plot should have x- and y- axis labels in addition to a title.  After the plot, include a discussion on observations from the scatterplot.
+
+Hints:
+- To sample from `rain`, use `sample_n()` from package `dplyr`.
+- To create MaxTempF, use conversion (9/5)C + 32 to change C to F.
+- Create a second new column named Colors that assigns a color based on RainToday variable.
+
+```{r}
+    library(dplyr)
+    set.seed(100)
+    WeatherSample = (sample_n(Weather, 1000))
+    WeatherSample = na.omit(WeatherSample)
+    
+    MaxTemp = unlist(as.double(WeatherSample[4]))#won't plot without doing unlist
+    MaxTempF = MaxTemp*(9/5)  + 32
+    
+    Humidity3PM = unlist(WeatherSample[15])
+    
+    RainedToday = unlist(ifelse(WeatherSample[23] == "No", "Blue", "Red"))
+    #ifRainedToday[i] == "No", set it to "Blue", else set it to "Red".
+    
+    plot(MaxTempF, Humidity3PM, main = "Daily High Temperature vs Afternoon Humidity",
+         xlab = "Highest Daily Temperature (F°)", 
+         ylab = "Humidity Level at 3pm (%)", col = RainedToday) 
+    
+    legend(x ="topright", legend = c("Yes", "No"), fill = c("Blue", "Red"), title = "Rainy Day")
+   
+    r = cor(as.double(MaxTempF), as.double(Humidity3PM), use = "complete.obs") 
+    r
+     
+    text(60, 20, paste("r = ",round(r, 3)))
+```
+
+The scatterplot shows a weak negative correlation between the max temperatures and the humidity levels at 3pm, as can be seen by the points being somewhat clustered together forming.  If this data is a representative sample, that indicates that, in Australia, in 2016, the humidity level at 3pm was a weak predictor for the highest temperature in a given day.  Specifically, the correlation coefficient, which I added to the graph is -0.421, which, squared, gives the coefficient of variation, which is about 0.177, which means that only about 17.7% of the variation in the daily high temperature readings is predicted by the variation in the humidity readings taken at 3pm.  
+Additionally, while there doesn't seem to be much of a pattern in the rainy vs non-rainy days it is worth noting that there are very few rainy days with a humidity of greater than 80% compared to non-rainy days.  
+
+
+## Question 2
+
+### Part A
+Plot a histogram of `Rainfall`, including all values from `rain` dataset given that it had rained that day.  Display density on the y-axis.  Label the axes and give the graph a title.  Colorize the bars.  Include a discussion after the plot.
+
+```{r}
+    RainedToday = Weather$RainToday
+    
+    NonzeroRainfall = ifelse(RainedToday == "Yes", Weather$Rainfall, NA)
+    
+    NonzeroRainfall = NonzeroRainfall[!is.na(NonzeroRainfall)]
+    
+    hist(NonzeroRainfall, freq = F, col = "lightblue", 
+         xlab = "Rainfall(mm)", ylab = "Density", ylim = c(0, 0.12),
+         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in 2016", labels = T)
+    
+    DensityFunction = density(NonzeroRainfall, kernel = "gaussian")
+    lines(DensityFunction$x, DensityFunction$y, type = 'l', lwd = 2)
+    
+    #Feel free to ignore the code below removing outliars.  I know it wasn't required.  I just wanted to see the plots with and without outliars and compare since the outliars were skewing things so much it was hard to see any patterns otherwise.
+    
+    RemoveObviousOutliars = ifelse(NonzeroRainfall < 55, NonzeroRainfall, NA)
+    RemoveObviousOutliars = RemoveObviousOutliars[!is.na(RemoveObviousOutliars)]
+    
+    hist(RemoveObviousOutliars, freq = F, col = "lightblue", 
+         xlab = "Rainfall(mm)", ylab = "Density", ylim = c(0,0.12),
+         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in 2016 without obvious outliars", labels = T)
+    
+    DensityFunction = density(RemoveObviousOutliars, kernel = "gaussian")
+    lines(DensityFunction$x, DensityFunction$y, type = 'l', lwd = 2)
+    
+    
+    #24.9 is upper outliar boundary. Lower boundary is negative and hence irrelevant 
+    RemoveAllOutliars = ifelse(NonzeroRainfall < 25, NonzeroRainfall, NA)
+    RemoveAllOutliars = RemoveAllOutliars[!is.na(RemoveAllOutliars)]
+    
+    hist(RemoveAllOutliars, freq = F, col = "lightblue", 
+         xlab = "Rainfall(mm)", ylab = "Density", ylim = c(0,0.15),
+         main = "Histogram and Density Function of Daily Rainfall \n in Austraulia in 2016 without any outliars", labels = T)
+    
+    DensityFunction = density(RemoveAllOutliars, kernel = "gaussian")
+    lines(DensityFunction$x, DensityFunction$y, type = 'l', lwd = 2)
+```
+The vast majority (about 89%) of the rain measurements are evidently in the range 0-50mm, and the few that aren't are incredibly spread out, in the range of around 40-115mm (note that the densities aren't actually zero; they're just so small they got rounded to zero). It's so spread out compared to the data in the range 0-40, in fact, that it's difficult to even see most of the bars after the four leftmost ones.  This indicates that Australia gets very little rain, as most of the rainfall values are less than 40mm.  
+
+### Part B
+Find the mean and median of the `Rainfall` in mm for days that it rained in Australia.  Do these numbers correspond with the image in part A?
+
+```{r}
+    mean(NonzeroRainfall)
+    median(NonzeroRainfall)
+    cat("\n")
+    mean(RemoveObviousOutliars)
+    median(RemoveObviousOutliars)
+    cat("\n")
+    mean(RemoveAllOutliars)
+    median(RemoveAllOutliars)
+```
+Yes, the mean and median make sense based on the distribution of the data shown in the histogram.  The data is highly right skewed with multiple extreme upper outliars.  As a result, the mean is significantly larger than the median.  Removing first the obvious outliars, then all outliars mitigates this effect greatly, though the data is still right skewed, so the mean is still significantly larger than the median.
+
+
+## Question 3
+
+### Part A
+Plot a bar graph representing *total* `Rainfall` in 2016 by `Location`.  Make sure to label the x- and y- axes, colorize the bars, include a title, and include the appropriate response labeled above each bar.  Utilize all observations from dataset `rain`. Include a discussion after the plot.
+
+```{r message=TRUE, warning=TRUE, paged.print=FALSE}
+    library(dplyr)
+    
+    RainfallByLocation = tapply(Weather$Rainfall, Weather$Location, sum)
+    
+    counts = as.vector(RainfallByLocation)
+    
+    par(mai=c(1, 0.82, 0.82, 0.42), mgp = c(3, 0, 1)) #adjust margins and axis label locations so   
+                                                      #everything fits on the graph properly
+
+    RainfallBarGraph = barplot(RainfallByLocation,
+                               main = "Total 2016 Rainfall by Location", xlab = "Location", 
+                               ylab = "Rainfall(mm)", ylim = c(0, 1500), xlim = c(0, 43), 
+                               width = 1.5, col = "deeppink", cex.names = 0.6, las = 3) 
+    
+    text(x = RainfallBarGraph, y = counts + 50, labels = round(counts, 2), cex = 0.5, col = "purple")
+
+```
+There's quite a lot of variation in the total rainfall between cities, although it should be noted that this is excluding all the NA's in the original data set, and there were a LOT, so some of the variation is likely due in part to a lack of data for some locations.  However, if we take the data at face value, it means that some cities received almost no rain for the entire year.  Woomera, for example, has the lowest total amount at 58.1mm or only 0.058m.  But even Sydney, the city with the highest total rainfall, had only about 1.14m for the whole year, which is quite a small amount.  So, going by this data set, it seems Australia has a very dry climate.
+
+
+### Part B
+Plot a bar graph representing *average* `Rainfall` per day based on `Location`.  Make sure to label the x- and y- axes, colorize the bars, include a title, and include the appropriate response labeled above each bar.  Utilize all observations from dataset `rain`. Include a discussion after the plot.
+
+```{r}
+    AverageRainfallByLocation = tapply(Weather$Rainfall, Weather$Location, mean)
+    
+    counts = as.vector(AverageRainfallByLocation)
+    
+    par(mai=c(1.02,0.82,0.8,0.1), mgp = c(3, 0, 1)) 
+
+    AverageRainfallBarGraph = barplot(AverageRainfallByLocation,  
+                                      main = "Average 2016 Rainfall by Location", xlab = "Location", 
+                                      ylab = "Rainfall(mm)", ylim = c(0, 4.5), xlim = c(0, 43), 
+                                      width = 1.5, col = "purple", cex.names = 0.6, las = 2) 
+    
+    text(x = AverageRainfallBarGraph, y = counts + 0.2, labels = as.character(round(counts, 2)), 
+         cex = 0.6, col = "deeppink")
+```
+There looks to be about the same amount of variation in the average rainfall per city as there is in the total rainfall per city.  The great difference is between Mildura and Sydney, which leads me to think they likely have different local climates.  But, as with total rainfall, the average rainfall graph also implies that Australia overall receives very little rain.
+
+### Part C
+Plot a bar graph representing *total* count of days rained in 2016 based on `Location`.  Make sure to label the x- and y- axes, colorize the bars, include a title, and include the appropriate response labeled above each bar.  Utilize all observations from dataset `rain`. Include a discussion after the plot.
+
+```{r}
+    DaysRainedByLocation = tapply((Weather$RainToday == "Yes"), Weather$Location, sum)
+
+    counts = as.vector(DaysRainedByLocation)
+    
+    par(mai=c(1.5,0.82,0.8,0.1), mgp = c(5, 1, 0)) #adjust margins so labels will fit on graph
+    
+    DaysRainedBarGraph = barplot(DaysRainedByLocation, main = "Rainy Days in 2016 by Location", 
+                                 xlab = "Location", las = 2, ylab = "Count of Rainy Days", 
+                                 ylim = c(0, 110), xlim = c(0, 43), width = 1.5, 
+                                 col = "deeppink", cex.names = 0.6) 
+    
+    text(x = DaysRainedBarGraph, y = counts + 5, labels = as.character(counts) , cex = 0.55, 
+         col = "purple")
+```
+
+Of note here is that the shape of the graph is a bit different compared to the previous two graphs.  For example, Watsonia averaged only 2.01mm of rain per day, which is in the middle of the range for the averages, but is tied with Melborne Airport as having the highest total number of rainy days.  This implies that, while it rains more often in Watsonia, each rain shower is probably relatively short.  
+
+## Question 4
+
+For locations `Brisbane`, `Melbourne`, `Perth`, and `Sydney`, plot side by side boxplots of the variable `Rainfall` for days where it rained.  The graph should include a title, x- and y-axis labels, and unique colors for the 4 boxplots.  The data should include all observations from the `rain` dataset.  Include a discussion after the plot.
+
+```{r}
+WeatherInRelevantCities = Weather[Weather$Location %in% c('Brisbane', 'Melbourne', 'Perth', 'Sydney'), ]
+
+WeatherInRelevantCities = (data.frame(WeatherInRelevantCities$Rainfall,   
+                                             WeatherInRelevantCities$Location))
+
+WeatherInRelevantCities = WeatherInRelevantCities[WeatherInRelevantCities[1] > 0,]
+
+
+names(WeatherInRelevantCities) = c("Rainfall", "Location")
+
+boxplot(Rainfall~Location, data = WeatherInRelevantCities, outline = T, 
+        main = "Daily 2016 Rainfall Grouped By City", ylab = "Daily Rainfall(mm)",
+        col=topo.colors(length(unique(WeatherInRelevantCities$Location))))
+
+par(mai=c(1.02,0.82,0.8,0.5))
+
+boxplot(Rainfall~Location, data = WeatherInRelevantCities, outline = F,
+        main = "Daily 2016 Rainfall Grouped By City \n (Outliars Excluded)",
+        ylab = "Daily Rainfall(mm)",
+        col=topo.colors(length(unique(WeatherInRelevantCities$Location))))
+
+
+```
+The first thing of note here is that the there are a LOT of outliars in these groups.  The first plot(the graph without outliars, not the boxplot of the first city) has so many that the space they take up somewhat obscures the actual boxes in the box plots. Brisbane and Sydney both have the widest spread to their outliars, which makes sense because they both also have the widest spread to their data overall.  
